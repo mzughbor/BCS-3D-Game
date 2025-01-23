@@ -18,7 +18,6 @@ class Game {
         this.office = new Office(this.scene, this.collisionManager);
 
         this.scene.add(this.player.mesh);
-        this.scene.add(this.player.cameraHolder);
         this.setupLighting();
         this.setupWindowResize();
         this.animate();
