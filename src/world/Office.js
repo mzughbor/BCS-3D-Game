@@ -5,7 +5,7 @@ export class Office {
     constructor(scene, collisionManager) {
         this.scene = scene;
         this.collisionManager = collisionManager;
-        this.collisionManager.setRoomRadius((GAME_SETTINGS.WORLD.ROOM_WIDTH / 2) * 0.85);
+        this.collisionManager.setRoomRadius((GAME_SETTINGS.WORLD.ROOM_WIDTH / 2) * 0.95);
         this.createRoom();
     }
 
@@ -39,7 +39,6 @@ export class Office {
         const radius = GAME_SETTINGS.WORLD.ROOM_WIDTH / 2;
         const segments = 32;
         
-        // Create two cylinders for the two-tone wall effect
         const createWallSection = (height, yOffset, color) => {
             const geometry = new THREE.CylinderGeometry(
                 radius, radius,
@@ -57,17 +56,24 @@ export class Office {
             const wall = new THREE.Mesh(geometry, material);
             wall.position.y = yOffset;
             this.scene.add(wall);
-            this.collisionManager.addWall(wall);
-        };
+        }
 
-        // Upper wall (constitution wallpaper)
+        // Add only one collision wall for the entire height
+        const collisionWall = new THREE.Mesh(
+            new THREE.CylinderGeometry(radius, radius, GAME_SETTINGS.WORLD.ROOM_HEIGHT, segments, 1, true),
+            new THREE.MeshBasicMaterial({ visible: false })
+        );
+        collisionWall.position.y = GAME_SETTINGS.WORLD.ROOM_HEIGHT / 2;
+        this.scene.add(collisionWall);
+        this.collisionManager.addWall(collisionWall);
+
+        // Visual walls (no collision)
         createWallSection(
             GAME_SETTINGS.WORLD.ROOM_HEIGHT * 0.6, 
             GAME_SETTINGS.WORLD.ROOM_HEIGHT * 0.7,
             0xd4c39d
         );
 
-        // Lower wall (white wainscoting)
         createWallSection(
             GAME_SETTINGS.WORLD.ROOM_HEIGHT * 0.4,
             GAME_SETTINGS.WORLD.ROOM_HEIGHT * 0.2,
@@ -112,7 +118,16 @@ export class Office {
 
             column.position.set(x, columnHeight / 2, z);
             this.scene.add(column);
-            this.collisionManager.addWall(column);
+            
+            // Adjust column collision to be slightly smaller
+            const collisionRadius = columnRadius * 0.8;
+            
+            // Add separate collision cylinder
+            const collisionGeometry = new THREE.CylinderGeometry(collisionRadius, collisionRadius, columnHeight, 8);
+            const collisionMesh = new THREE.Mesh(collisionGeometry, new THREE.MeshBasicMaterial({ visible: false }));
+            collisionMesh.position.copy(column.position);
+            this.scene.add(collisionMesh);
+            this.collisionManager.addWall(collisionMesh);
         }
     }
 

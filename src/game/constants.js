@@ -1,10 +1,9 @@
 export const GAME_SETTINGS = {
     PLAYER: {
-        MOVE_SPEED: 0.15,
-        TURN_SPEED: 0.03,
+        MOVE_SPEED: 0.1,
         HEIGHT: 1.8,
         WIDTH: 0.5,
-        COLLISION_RADIUS: 0.3,
+        COLLISION_RADIUS: 0.25,
         MOUSE_SENSITIVITY: 0.002
     },
     WORLD: {

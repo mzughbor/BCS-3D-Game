@@ -27,8 +27,8 @@ export class Player {
         });
         const mesh = new THREE.Mesh(geometry, material);
         
-        // Start position - moved further from walls
-        mesh.position.set(-2, GAME_SETTINGS.PLAYER.HEIGHT / 2, 2);
+        // Move starting position further from walls
+        mesh.position.set(-4, GAME_SETTINGS.PLAYER.HEIGHT / 2, 4);
         
         // Create head for camera
         this.head = new THREE.Object3D();
@@ -45,11 +45,7 @@ export class Player {
             0.1, 
             1000
         );
-        
-        // Add camera to the head object instead of directly to mesh
         this.head.add(this.camera);
-        
-        return this.mesh;
     }
 
     update() {
