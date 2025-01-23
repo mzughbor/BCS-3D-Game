@@ -15,7 +15,6 @@ export class Player {
     }
 
     createPlayerMesh() {
-        // Create player body
         const geometry = new THREE.BoxGeometry(
             GAME_SETTINGS.PLAYER.WIDTH,
             GAME_SETTINGS.PLAYER.HEIGHT,
@@ -28,12 +27,12 @@ export class Player {
         });
         const mesh = new THREE.Mesh(geometry, material);
         
-        // Set starting position near entrance, but safely away from walls and columns
-        mesh.position.set(-3, GAME_SETTINGS.PLAYER.HEIGHT / 2, 3);
+        // Start position - moved further from walls
+        mesh.position.set(-2, GAME_SETTINGS.PLAYER.HEIGHT / 2, 2);
         
-        // Create a separate head object for the camera
+        // Create head for camera
         this.head = new THREE.Object3D();
-        this.head.position.y = 1.7; // Eye level
+        this.head.position.y = 1.7;
         mesh.add(this.head);
 
         return mesh;

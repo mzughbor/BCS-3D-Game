@@ -1,6 +1,6 @@
 export const GAME_SETTINGS = {
     PLAYER: {
-        MOVE_SPEED: 0.1,
+        MOVE_SPEED: 0.15,
         TURN_SPEED: 0.03,
         HEIGHT: 1.8,
         WIDTH: 0.5,

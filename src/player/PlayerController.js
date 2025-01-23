@@ -8,6 +8,11 @@ export class PlayerController {
         this.moveLeft = false;
         this.moveRight = false;
         this.isPointerLocked = false;
+        
+        // Make sure we bind the event handlers to this instance
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.handleKeyUp = this.handleKeyUp.bind(this);
+        
         this.setupControls();
         this.setupMouseControls();
         this.createInstructions();
@@ -36,8 +41,9 @@ export class PlayerController {
     }
 
     setupControls() {
-        document.addEventListener('keydown', (event) => this.handleKeyDown(event));
-        document.addEventListener('keyup', (event) => this.handleKeyUp(event));
+        // Add event listeners directly to document
+        document.addEventListener('keydown', this.handleKeyDown);
+        document.addEventListener('keyup', this.handleKeyUp);
     }
 
     setupMouseControls() {
@@ -75,62 +81,98 @@ export class PlayerController {
 
     handleKeyDown(event) {
         switch (event.code) {
-            case 'KeyW': this.moveForward = true; break;
-            case 'KeyS': this.moveBackward = true; break;
-            case 'KeyA': this.moveLeft = true; break;
-            case 'KeyD': this.moveRight = true; break;
+            case 'KeyW':
+            case 'ArrowUp':
+                this.moveForward = true;
+                break;
+            case 'KeyS':
+            case 'ArrowDown':
+                this.moveBackward = true;
+                break;
+            case 'KeyA':
+            case 'ArrowLeft':
+                this.moveLeft = true;
+                break;
+            case 'KeyD':
+            case 'ArrowRight':
+                this.moveRight = true;
+                break;
         }
     }
 
     handleKeyUp(event) {
         switch (event.code) {
-            case 'KeyW': this.moveForward = false; break;
-            case 'KeyS': this.moveBackward = false; break;
-            case 'KeyA': this.moveLeft = false; break;
-            case 'KeyD': this.moveRight = false; break;
+            case 'KeyW':
+            case 'ArrowUp':
+                this.moveForward = false;
+                break;
+            case 'KeyS':
+            case 'ArrowDown':
+                this.moveBackward = false;
+                break;
+            case 'KeyA':
+            case 'ArrowLeft':
+                this.moveLeft = false;
+                break;
+            case 'KeyD':
+            case 'ArrowRight':
+                this.moveRight = false;
+                break;
         }
     }
 
     update(collisionManager) {
+        if (!this.isPointerLocked) return; // Don't move if not locked
+
         const mesh = this.player.mesh;
-        
-        // Calculate movement relative to camera direction
         const moveVector = new THREE.Vector3(0, 0, 0);
-        
+        const speed = this.player.moveSpeed;
+
         // Forward/backward movement
         if (this.moveForward || this.moveBackward) {
-            const forwardVector = new THREE.Vector3(0, 0, -1);
-            forwardVector.applyQuaternion(mesh.quaternion);
-            forwardVector.y = 0; // Keep movement horizontal
-            forwardVector.normalize();
+            const forward = new THREE.Vector3(0, 0, -1);
+            forward.applyQuaternion(mesh.quaternion);
+            forward.y = 0;
+            forward.normalize();
             
-            if (this.moveForward) moveVector.add(forwardVector);
-            if (this.moveBackward) moveVector.sub(forwardVector);
-        }
-        
-        // Left/right movement
-        if (this.moveLeft || this.moveRight) {
-            const rightVector = new THREE.Vector3(1, 0, 0);
-            rightVector.applyQuaternion(mesh.quaternion);
-            rightVector.y = 0; // Keep movement horizontal
-            rightVector.normalize();
-            
-            if (this.moveRight) moveVector.add(rightVector);
-            if (this.moveLeft) moveVector.sub(rightVector);
+            const multiplier = this.moveForward ? speed : -speed;
+            moveVector.add(forward.multiplyScalar(multiplier));
         }
 
-        // Normalize and apply speed
-        if (moveVector.length() > 0) {
-            moveVector.normalize().multiplyScalar(this.player.moveSpeed);
+        // Left/right movement
+        if (this.moveLeft || this.moveRight) {
+            const right = new THREE.Vector3(1, 0, 0);
+            right.applyQuaternion(mesh.quaternion);
+            right.y = 0;
+            right.normalize();
             
-            // Test new position before moving
+            const multiplier = this.moveRight ? speed : -speed;
+            moveVector.add(right.multiplyScalar(multiplier));
+        }
+
+        // Apply movement if there's any
+        if (moveVector.length() > 0) {
             const newPosition = mesh.position.clone().add(moveVector);
+            
+            // Debug log
+            console.log('Trying to move:', {
+                current: mesh.position.clone(),
+                new: newPosition,
+                vector: moveVector,
+                keys: {
+                    w: this.moveForward,
+                    s: this.moveBackward,
+                    a: this.moveLeft,
+                    d: this.moveRight
+                }
+            });
+
             if (!collisionManager.checkCollision(newPosition, this.player.getCollisionRadius())) {
                 mesh.position.add(moveVector);
             }
         }
 
-        // Update camera and body rotation
+        // Update camera
         this.player.update();
     }
 } 
