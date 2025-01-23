@@ -1,6 +1,11 @@
 export class CollisionManager {
     constructor() {
         this.walls = [];
+        this.roomRadius = 0; // Will store the room's radius
+    }
+
+    setRoomRadius(radius) {
+        this.roomRadius = radius;
     }
 
     addWall(wall) {
@@ -8,6 +13,13 @@ export class CollisionManager {
     }
 
     checkCollision(position, radius) {
+        // Check if player is trying to go outside the room
+        const distanceFromCenter = Math.sqrt(position.x * position.x + position.z * position.z);
+        if (distanceFromCenter + radius > this.roomRadius) {
+            return true; // Collision with outer wall
+        }
+
+        // Check collisions with furniture and columns
         for (const wall of this.walls) {
             // Convert position to wall's local space
             const localPosition = position.clone().sub(wall.position);

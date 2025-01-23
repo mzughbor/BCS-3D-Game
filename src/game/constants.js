@@ -4,11 +4,12 @@ export const GAME_SETTINGS = {
         TURN_SPEED: 0.03,
         HEIGHT: 1.8,
         WIDTH: 0.5,
-        COLLISION_RADIUS: 0.3
+        COLLISION_RADIUS: 0.3,
+        MOUSE_SENSITIVITY: 0.002
     },
     WORLD: {
-        ROOM_WIDTH: 10,
-        ROOM_HEIGHT: 5,
+        ROOM_WIDTH: 15,
+        ROOM_HEIGHT: 4,
         WALL_THICKNESS: 0.1
     }
 }; 

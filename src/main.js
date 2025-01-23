@@ -8,7 +8,7 @@ import { CollisionManager } from '/src/utils/CollisionManager.js';
 class Game {
     constructor() {
         this.scene = new THREE.Scene();
-        this.renderer = new THREE.WebGLRenderer();
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(this.renderer.domElement);
 
@@ -18,6 +18,7 @@ class Game {
         this.office = new Office(this.scene, this.collisionManager);
 
         this.scene.add(this.player.mesh);
+        this.scene.add(this.player.cameraHolder);
         this.setupLighting();
         this.setupWindowResize();
         this.animate();
