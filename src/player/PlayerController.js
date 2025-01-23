@@ -95,36 +95,39 @@ export class PlayerController {
         const mesh = this.player.mesh;
         
         // Calculate movement relative to camera direction
-        const moveVector = new THREE.Vector3();
+        const moveVector = new THREE.Vector3(0, 0, 0);
         
-        // Get the direction the player is facing
-        const direction = new THREE.Vector3(0, 0, -1);
-        direction.applyQuaternion(mesh.quaternion);
-        
-        // Calculate forward/backward movement
-        if (this.moveForward) {
-            moveVector.add(direction.multiplyScalar(this.player.moveSpeed));
+        // Forward/backward movement
+        if (this.moveForward || this.moveBackward) {
+            const forwardVector = new THREE.Vector3(0, 0, -1);
+            forwardVector.applyQuaternion(mesh.quaternion);
+            forwardVector.y = 0; // Keep movement horizontal
+            forwardVector.normalize();
+            
+            if (this.moveForward) moveVector.add(forwardVector);
+            if (this.moveBackward) moveVector.sub(forwardVector);
         }
-        if (this.moveBackward) {
-            moveVector.add(direction.multiplyScalar(-this.player.moveSpeed));
-        }
         
-        // Calculate left/right movement (perpendicular to facing direction)
+        // Left/right movement
         if (this.moveLeft || this.moveRight) {
-            const sideDirection = new THREE.Vector3(-direction.z, 0, direction.x);
-            const sideMultiplier = this.moveLeft ? -1 : 1;
-            moveVector.add(sideDirection.multiplyScalar(this.player.moveSpeed * sideMultiplier));
+            const rightVector = new THREE.Vector3(1, 0, 0);
+            rightVector.applyQuaternion(mesh.quaternion);
+            rightVector.y = 0; // Keep movement horizontal
+            rightVector.normalize();
+            
+            if (this.moveRight) moveVector.add(rightVector);
+            if (this.moveLeft) moveVector.sub(rightVector);
         }
 
-        // Normalize diagonal movement
+        // Normalize and apply speed
         if (moveVector.length() > 0) {
             moveVector.normalize().multiplyScalar(this.player.moveSpeed);
-        }
-
-        // Apply movement if no collision
-        const newPosition = mesh.position.clone().add(moveVector);
-        if (!collisionManager.checkCollision(newPosition, this.player.getCollisionRadius())) {
-            mesh.position.add(moveVector);
+            
+            // Test new position before moving
+            const newPosition = mesh.position.clone().add(moveVector);
+            if (!collisionManager.checkCollision(newPosition, this.player.getCollisionRadius())) {
+                mesh.position.add(moveVector);
+            }
         }
 
         // Update camera and body rotation
