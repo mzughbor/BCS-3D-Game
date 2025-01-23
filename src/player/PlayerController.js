@@ -122,51 +122,33 @@ export class PlayerController {
     }
 
     update(collisionManager) {
-        if (!this.isPointerLocked) return; // Don't move if not locked
+        if (!this.isPointerLocked) return;
 
         const mesh = this.player.mesh;
-        const moveVector = new THREE.Vector3(0, 0, 0);
-        const speed = this.player.moveSpeed;
-
-        // Forward/backward movement
-        if (this.moveForward || this.moveBackward) {
-            const forward = new THREE.Vector3(0, 0, -1);
-            forward.applyQuaternion(mesh.quaternion);
-            forward.y = 0;
-            forward.normalize();
-            
-            const multiplier = this.moveForward ? speed : -speed;
-            moveVector.add(forward.multiplyScalar(multiplier));
+        const moveVector = new THREE.Vector3();
+        
+        // Get the direction the player is facing
+        const direction = new THREE.Vector3(0, 0, -1);
+        direction.applyQuaternion(mesh.quaternion);
+        
+        // Calculate forward/backward movement
+        if (this.moveForward) {
+            moveVector.add(direction.clone().multiplyScalar(this.player.moveSpeed));
         }
-
-        // Left/right movement
+        if (this.moveBackward) {
+            moveVector.add(direction.clone().multiplyScalar(-this.player.moveSpeed));
+        }
+        
+        // Calculate left/right movement (perpendicular to facing direction)
         if (this.moveLeft || this.moveRight) {
-            const right = new THREE.Vector3(1, 0, 0);
-            right.applyQuaternion(mesh.quaternion);
-            right.y = 0;
-            right.normalize();
-            
-            const multiplier = this.moveRight ? speed : -speed;
-            moveVector.add(right.multiplyScalar(multiplier));
+            const sideDirection = new THREE.Vector3(-direction.z, 0, direction.x);
+            const sideMultiplier = this.moveLeft ? -1 : 1;
+            moveVector.add(sideDirection.multiplyScalar(this.player.moveSpeed * sideMultiplier));
         }
 
-        // Apply movement if there's any
+        // Apply movement if no collision
         if (moveVector.length() > 0) {
             const newPosition = mesh.position.clone().add(moveVector);
-            
-            // Debug log
-            console.log('Trying to move:', {
-                current: mesh.position.clone(),
-                new: newPosition,
-                vector: moveVector,
-                keys: {
-                    w: this.moveForward,
-                    s: this.moveBackward,
-                    a: this.moveLeft,
-                    d: this.moveRight
-                }
-            });
-
             if (!collisionManager.checkCollision(newPosition, this.player.getCollisionRadius())) {
                 mesh.position.add(moveVector);
             }
