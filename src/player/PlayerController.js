@@ -95,8 +95,11 @@ export class PlayerController {
         // Calculate movement relative to camera direction
         const moveVector = new THREE.Vector3();
         
+        // Forward/backward movement is now relative to body direction
         if (this.moveForward) moveVector.z -= this.player.moveSpeed;
         if (this.moveBackward) moveVector.z += this.player.moveSpeed;
+        
+        // Strafe movement is still relative to body direction
         if (this.moveLeft) moveVector.x -= this.player.moveSpeed;
         if (this.moveRight) moveVector.x += this.player.moveSpeed;
 
@@ -105,10 +108,7 @@ export class PlayerController {
             moveVector.normalize().multiplyScalar(this.player.moveSpeed);
         }
 
-        // Apply camera rotation to movement
-        moveVector.applyEuler(new THREE.Euler(0, this.player.cameraRotation.y, 0));
-        
-        // Test collision before moving
+        // Movement is already relative to body rotation since the mesh rotates with camera
         const newPosition = mesh.position.clone().add(moveVector);
         if (!collisionManager.checkCollision(newPosition, this.player.getCollisionRadius())) {
             mesh.position.add(moveVector);

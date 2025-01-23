@@ -8,7 +8,7 @@ export class Player {
         
         // Initialize camera rotation before creating mesh
         this.cameraRotation = new THREE.Euler(0, 0, 0, 'YXZ');
-        this.mouseSensitivity = 0.002;
+        this.mouseSensitivity = GAME_SETTINGS.PLAYER.MOUSE_SENSITIVITY;
         
         this.mesh = this.createPlayerMesh();
         this.setupCamera();
@@ -24,18 +24,15 @@ export class Player {
         const material = new THREE.MeshPhongMaterial({ 
             color: 0x00ff00,
             transparent: true,
-            opacity: 0.7 // Make it slightly transparent
+            opacity: 0.7
         });
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.y = GAME_SETTINGS.PLAYER.HEIGHT / 2;
-        
-        // Add a direction indicator (arrow)
-        const arrowGeometry = new THREE.ConeGeometry(0.2, 0.5, 8);
-        const arrowMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-        const arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
-        arrow.rotation.x = -Math.PI / 2;
-        arrow.position.set(0, 1, -0.5);
-        mesh.add(arrow);
+
+        // Create a separate head object for the camera
+        this.head = new THREE.Object3D();
+        this.head.position.y = 1.7; // Eye level
+        mesh.add(this.head);
 
         return mesh;
     }
@@ -48,21 +45,17 @@ export class Player {
             1000
         );
         
-        // Position camera at player's head level
-        this.camera.position.y = 1.7; // Approximate eye level
-        this.camera.position.z = 0;
-        
-        // Add camera directly to mesh for proper rotation
-        this.mesh.add(this.camera);
+        // Add camera to the head object instead of directly to mesh
+        this.head.add(this.camera);
         
         return this.mesh;
     }
 
     update() {
-        // Apply camera rotation
-        this.camera.rotation.copy(this.cameraRotation);
+        // Only apply vertical rotation to the head/camera
+        this.head.rotation.x = this.cameraRotation.x;
         
-        // Update player mesh rotation to match camera's Y rotation
+        // Apply horizontal rotation to the entire body
         this.mesh.rotation.y = this.cameraRotation.y;
     }
 
