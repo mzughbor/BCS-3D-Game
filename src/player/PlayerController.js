@@ -95,26 +95,37 @@ export class PlayerController {
         // Calculate movement relative to camera direction
         const moveVector = new THREE.Vector3();
         
-        // Forward/backward movement is now relative to body direction
-        if (this.moveForward) moveVector.z -= this.player.moveSpeed;
-        if (this.moveBackward) moveVector.z += this.player.moveSpeed;
+        // Get the direction the player is facing
+        const direction = new THREE.Vector3(0, 0, -1);
+        direction.applyQuaternion(mesh.quaternion);
         
-        // Strafe movement is still relative to body direction
-        if (this.moveLeft) moveVector.x -= this.player.moveSpeed;
-        if (this.moveRight) moveVector.x += this.player.moveSpeed;
+        // Calculate forward/backward movement
+        if (this.moveForward) {
+            moveVector.add(direction.multiplyScalar(this.player.moveSpeed));
+        }
+        if (this.moveBackward) {
+            moveVector.add(direction.multiplyScalar(-this.player.moveSpeed));
+        }
+        
+        // Calculate left/right movement (perpendicular to facing direction)
+        if (this.moveLeft || this.moveRight) {
+            const sideDirection = new THREE.Vector3(-direction.z, 0, direction.x);
+            const sideMultiplier = this.moveLeft ? -1 : 1;
+            moveVector.add(sideDirection.multiplyScalar(this.player.moveSpeed * sideMultiplier));
+        }
 
         // Normalize diagonal movement
         if (moveVector.length() > 0) {
             moveVector.normalize().multiplyScalar(this.player.moveSpeed);
         }
 
-        // Movement is already relative to body rotation since the mesh rotates with camera
+        // Apply movement if no collision
         const newPosition = mesh.position.clone().add(moveVector);
         if (!collisionManager.checkCollision(newPosition, this.player.getCollisionRadius())) {
             mesh.position.add(moveVector);
         }
 
-        // Update camera position
+        // Update camera and body rotation
         this.player.update();
     }
 } 

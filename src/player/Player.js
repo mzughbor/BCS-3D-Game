@@ -55,7 +55,7 @@ export class Player {
         // Only apply vertical rotation to the head/camera
         this.head.rotation.x = this.cameraRotation.x;
         
-        // Apply horizontal rotation to the entire body
+        // Apply horizontal rotation to the entire body immediately
         this.mesh.rotation.y = this.cameraRotation.y;
     }
 
