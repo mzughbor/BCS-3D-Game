@@ -28,6 +28,7 @@ export class PlayerController {
             color: white;
             border-radius: 10px;
             pointer-events: none;
+            z-index: 1000;
         `;
         instructions.innerHTML = 'Click to play<br>(W,A,S,D = Move, Mouse = Look around)<br>ESC to pause';
         document.body.appendChild(instructions);
@@ -59,8 +60,9 @@ export class PlayerController {
         });
 
         // Handle pointer lock error
-        document.addEventListener('pointerlockerror', () => {
-            console.error('Pointer lock failed');
+        document.addEventListener('pointerlockerror', (event) => {
+            console.error('Pointer lock failed', event);
+            this.instructions.textContent = 'Error: Pointer lock failed. Click again to retry.';
         });
 
         // Handle mouse movement
