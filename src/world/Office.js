@@ -15,6 +15,7 @@ export class Office {
         this.createOuterWall();
         this.createColumns();
         this.createWindows();
+        this.createStatueOfLiberty();
         this.createFurniture();
     }
 
@@ -144,6 +145,76 @@ export class Office {
             window.lookAt(0, windowHeight, 0);
             this.scene.add(window);
         }
+    }
+
+    createStatueOfLiberty() {
+        // Create the statue body
+        const bodyGeometry = new THREE.CylinderGeometry(0.3, 0.6, 2, 8);
+        const crownGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.4, 7);
+        const armGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 8);
+        const torchGeometry = new THREE.ConeGeometry(0.2, 0.4, 8);
+        
+        const statueMaterial = new THREE.MeshPhongMaterial({
+            color: 0x7B9E89,  // Statue of Liberty green
+            metalness: 0.5,
+            roughness: 0.5
+        });
+
+        // Create statue parts
+        const body = new THREE.Mesh(bodyGeometry, statueMaterial);
+        const crown = new THREE.Mesh(crownGeometry, statueMaterial);
+        const arm = new THREE.Mesh(armGeometry, statueMaterial);
+        const torch = new THREE.Mesh(torchGeometry, statueMaterial);
+
+        // Position crown
+        crown.position.y = 1.2;
+        
+        // Position arm and torch
+        arm.position.set(0.4, 0.8, 0);
+        arm.rotation.z = Math.PI / 4;
+        torch.position.set(0.8, 1.2, 0);
+
+        // Create statue group
+        this.statue = new THREE.Group();
+        this.statue.add(body);
+        this.statue.add(crown);
+        this.statue.add(arm);
+        this.statue.add(torch);
+
+        // Position the entire statue
+        this.statue.position.set(0, 1, 0);
+        this.scene.add(this.statue);
+
+        // Add collision detection
+        this.collisionManager.addInteractiveObject(this.statue, this.handleStatueCollision.bind(this));
+    }
+
+    handleStatueCollision() {
+        if (this.statue.isShaking) return; // Prevent multiple shakes
+        this.statue.isShaking = true;
+
+        const originalRotation = this.statue.rotation.y;
+        const shakeAmount = 0.1;
+        const shakeDuration = 200; // milliseconds
+
+        // Shake animation
+        const startTime = Date.now();
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            if (elapsed > shakeDuration) {
+                this.statue.rotation.y = originalRotation;
+                this.statue.isShaking = false;
+                return;
+            }
+
+            const progress = elapsed / shakeDuration;
+            const shake = Math.sin(progress * Math.PI * 4) * shakeAmount * (1 - progress);
+            this.statue.rotation.y = originalRotation + shake;
+
+            requestAnimationFrame(animate);
+        };
+
+        animate();
     }
 
     createFurniture() {

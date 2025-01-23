@@ -2,6 +2,7 @@ export class CollisionManager {
     constructor() {
         this.walls = [];
         this.roomRadius = 0; // Will store the room's radius
+        this.interactiveObjects = new Map(); // Map objects to their collision handlers
     }
 
     setRoomRadius(radius) {
@@ -10,6 +11,11 @@ export class CollisionManager {
 
     addWall(wall) {
         this.walls.push(wall);
+    }
+
+    addInteractiveObject(object, collisionHandler) {
+        this.interactiveObjects.set(object, collisionHandler);
+        this.walls.push(object); // Add to walls for normal collision detection
     }
 
     checkCollision(position, radius) {
@@ -29,6 +35,11 @@ export class CollisionManager {
             if (Math.abs(localPosition.x) < wall.geometry.parameters.width / 2 + radius &&
                 Math.abs(localPosition.y) < wall.geometry.parameters.height / 2 + radius &&
                 Math.abs(localPosition.z) < 0.1 + radius) {
+                
+                // If it's an interactive object, trigger its collision handler
+                if (this.interactiveObjects.has(wall)) {
+                    this.interactiveObjects.get(wall)();
+                }
                 return true; // Collision detected
             }
         }
