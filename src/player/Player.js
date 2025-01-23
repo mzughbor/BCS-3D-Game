@@ -27,8 +27,10 @@ export class Player {
             opacity: 0.7
         });
         const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.y = GAME_SETTINGS.PLAYER.HEIGHT / 2;
-
+        
+        // Set starting position near the entrance
+        mesh.position.set(-5, GAME_SETTINGS.PLAYER.HEIGHT / 2, 5);
+        
         // Create a separate head object for the camera
         this.head = new THREE.Object3D();
         this.head.position.y = 1.7; // Eye level
