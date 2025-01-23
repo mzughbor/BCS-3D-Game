@@ -28,8 +28,8 @@ export class Player {
         });
         const mesh = new THREE.Mesh(geometry, material);
         
-        // Set starting position near the entrance
-        mesh.position.set(-5, GAME_SETTINGS.PLAYER.HEIGHT / 2, 5);
+        // Set starting position near entrance, but safely away from walls and columns
+        mesh.position.set(-3, GAME_SETTINGS.PLAYER.HEIGHT / 2, 3);
         
         // Create a separate head object for the camera
         this.head = new THREE.Object3D();
