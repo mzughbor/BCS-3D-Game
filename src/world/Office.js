@@ -86,9 +86,10 @@ export class Office {
         const columnGeometry = new THREE.CylinderGeometry(columnRadius, columnRadius, columnHeight, 16);
         const capitalGeometry = new THREE.CylinderGeometry(columnRadius * 1.5, columnRadius, columnHeight * 0.1, 16);
         const columnMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0xffffff,
-            specular: 0x111111,
-            shininess: 100
+            color: 0xffffff,  // Pure white color
+            specular: 0xffffff, // White specular highlight
+            shininess: 100,
+            emissive: 0x111111 // Slight emissive to enhance the white appearance
         });
 
         for (let i = 0; i < numColumns; i++) {
