@@ -31,43 +31,18 @@ export class CollisionManager {
 
             // Convert position to wall's local space
             const localPosition = position.clone().sub(wall.position);
-            
-            // Handle groups (like the statue)
-            if (wall.type === 'Group') {
-                const boundingRadius = 1; // Approximate bounding radius for groups
-                if (localPosition.length() < (boundingRadius + radius)) {
-                    if (this.interactiveObjects.has(wall)) {
-                        this.interactiveObjects.get(wall)();
-                    }
-                    return true;
-                }
-                continue;
-            }
+            localPosition.applyQuaternion(wall.quaternion.clone().invert());
 
             // Handle regular meshes
-            if (wall.geometry) {
-                let collisionWidth = 1;
-                let collisionHeight = 1;
-                let collisionDepth = 1;
-
-                // Try to get actual dimensions if available
-                if (wall.geometry.parameters) {
-                    collisionWidth = wall.geometry.parameters.width || wall.geometry.parameters.radiusTop * 2 || 1;
-                    collisionHeight = wall.geometry.parameters.height || 1;
-                    collisionDepth = wall.geometry.parameters.depth || wall.geometry.parameters.radiusTop * 2 || 1;
-                }
-
-                // Apply wall's rotation to local position
-                localPosition.applyQuaternion(wall.quaternion.clone().invert());
+            if (wall.geometry && wall.geometry.parameters) {
+                let width = wall.geometry.parameters.width || wall.geometry.parameters.radiusTop * 2 || 1;
+                let height = wall.geometry.parameters.height || 1;
+                let depth = wall.geometry.parameters.depth || wall.geometry.parameters.radiusTop * 2 || 1;
 
                 // Box collision check
-                if (Math.abs(localPosition.x) < collisionWidth / 2 + radius &&
-                    Math.abs(localPosition.y) < collisionHeight / 2 + radius &&
-                    Math.abs(localPosition.z) < collisionDepth / 2 + radius) {
-                    
-                    if (this.interactiveObjects.has(wall)) {
-                        this.interactiveObjects.get(wall)();
-                    }
+                if (Math.abs(localPosition.x) < width / 2 + radius &&
+                    Math.abs(localPosition.y) < height / 2 + radius &&
+                    Math.abs(localPosition.z) < depth / 2 + radius) {
                     return true;
                 }
             }
